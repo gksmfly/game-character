@@ -90,6 +90,11 @@ plugins { application } 와 application { mainClass.set("rts.MainKt") } 가 설�
 | Polymorphism (다형성)          | 각 유닛이 `moveTo`/`attack`를 오버라이드하여 다른 로직을 같은 방식으로 호출                     |
 | SRP / OCP (단일 책임/개방-폐쇄)| 규칙은 각 클래스에 단일 책임으로 배치, 새 유닛 추가 시 기존 코드 수정 없이 확장 가능            |
 
+#### 알고리즘 포인트
+- **라운드 로빈 균등 배치:** `idx % shuttles.size`로 32기를 4대 Shuttle에 고르게 분산
+- **정원 제약:** `Shuttle.capacity = 8`을 초과하면 탑승 거부(출력 로그로 검증)
+- **도메인 판정:** `Domain.GROUND/AIR`로 공격 가능 여부를 단순·명확하게 결정
+
 ---
  
 ### 7. 실행 시나리오(검증용)
