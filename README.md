@@ -21,6 +21,10 @@
     - **Archer**: 걸어서 이동(느림), **지상/공중 모두 공격 가능**
     - **Griffin**: 날아서 이동, **하늘에서 지상만 공격**
     - **Shuttle**: 비행 유닛, **공격 불가**, Knight/Archer **최대 8기 탑승 가능**
+- **탑승 분배 규칙**
+  - Knight/Archer 32기는 **라운드 로빈(ROUND-ROBIN)** 으로 4대 Shuttle에 **균등 배치**
+  - 분배 공식: i번째 병사는 **`i % 4`** 번째 Shuttle에 탑승
+  - **정원 준수:** Shuttle 1대당 최대 **8명**
 - 모든 행동은 `println`으로 **한글 메시지** 출력
 - 각 캐릭터의 동작 규칙은 **다형성**으로 처리 (오버라이드)
 
@@ -82,8 +86,7 @@ plugins { application } 와 application { mainClass.set("rts.MainKt") } 가 설�
 |--------------------------------|-------------------------------------------------------------------------------------------------|
 | Abstraction (추상화)           | 공통 행위를 `Movable`(이동), `Attacker`(공격) 인터페이스로 분리                                 |
 | Encapsulation (캡슐화)         | `Shuttle`의 탑승자 목록을 `private`로 은닉, `board()`/`disembarkAll()`로만 상태 변경               |
-| Inheritance (상속)             | UnitBase 상속으로 공통 속성(name, position, domain) 재사용, 이동/공격 행위는 
-인터페이스(Movable/Attacker) 계약에 따라 하위 클래스에서 구현                 |
+| Inheritance (상속)             | UnitBase 상속으로 공통 속성(name, position, domain) 재사용, 이동/공격 행위는 인터페이스(Movable/Attacker) 계약에 따라 하위 클래스에서 구현                 |
 | Polymorphism (다형성)          | 각 유닛이 `moveTo`/`attack`를 오버라이드하여 다른 로직을 같은 방식으로 호출                     |
 | SRP / OCP (단일 책임/개방-폐쇄)| 규칙은 각 클래스에 단일 책임으로 배치, 새 유닛 추가 시 기존 코드 수정 없이 확장 가능            |
 
