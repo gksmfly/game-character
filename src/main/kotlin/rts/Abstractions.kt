@@ -1,20 +1,17 @@
-package rts.rts
+package rts
 
-import rts.rts.Point
+enum class Domain { GROUND, AIR }
 
 interface Movable {
-    fun moveTo(point: Point)
-}
-
-abstract class UnitBase(
-    val id: String,
-    var position: Point,
-    val isFlying: Boolean
-) : Movable {
-    abstract val typeName: String
-    open fun describe(): String = "$typeName#$id"
+    fun moveTo(target: Point)
 }
 
 interface Attacker {
     fun attack(target: UnitBase)
 }
+
+open class UnitBase(
+    val name: String,
+    var position: Point,
+    open val domain: Domain
+)
