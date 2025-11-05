@@ -1,110 +1,82 @@
-package rts.rts
+package rts
+// Knight: 말을 타고 이동, 공중 유닛 공격 불가
+class Knight(name: String, pos: Point) :
+    UnitBase(name, pos, Domain.GROUND), Movable, Attacker {
 
-// Knight, Archer, Shuttle, Griffin 규칙은 과제 명세를 그대로 반영
-// - Knight/Archer/Griffin: 공격 가능 (단, 제약 다름)
-// - Shuttle: 탑승/이동만, 공격 불가
-// - 이동 메시지는 한글, System.out.println 사용 (println 사용)
-
-class Knight(id: String, position: Point) :
-    UnitBase(id, position, isFlying = false), Attacker {
-
-    override val typeName: String = "Knight"
-
-    override fun moveTo(point: Point) {
-        println("${describe()}가 말을 타고 ${position}에서 ${point}로 이동합니다.")
-        position = point
+    override fun moveTo(target: Point) {
+        position = target
+        System.out.println("${name}가 말을 타고 (${target.x}, ${target.y})로 이동합니다.")
     }
 
     override fun attack(target: UnitBase) {
-        if (target.isFlying) {
-            println("${describe()} → ${target.describe()} : 공격할 수 없습니다 (날아다니는 캐릭터는 Knight가 공격 불가).")
+        if (target.domain == Domain.AIR) {
+            System.out.println("${name}가 ${target.name}을 공격할 수 없습니다. (공중 유닛)")
             return
         }
-        println("${describe()}가 말 위에서 창으로 ${target.describe()}를 찌릅니다!")
+        System.out.println("${name}가 ${target.name}를 창으로 찌릅니다.")
     }
 }
 
-class Archer(id: String, position: Point) :
-    UnitBase(id, position, isFlying = false), Attacker {
+// Archer: 걸어서 이동(느림), 지상/공중 모두 공격 가능
+class Archer(name: String, pos: Point) :
+    UnitBase(name, pos, Domain.GROUND), Movable, Attacker {
 
-    override val typeName: String = "Archer"
-
-    override fun moveTo(point: Point) {
-        println("${describe()}가 걸어서(느림) ${position}에서 ${point}로 이동합니다.")
-        position = point
+    override fun moveTo(target: Point) {
+        position = target
+        System.out.println("${name}가 걸어서 (${target.x}, ${target.y})로 이동합니다.")
     }
 
     override fun attack(target: UnitBase) {
-        val domain = if (target.isFlying) "하늘의" else "땅의"
-        println("${describe()}가 화살을 쏩니다! (${domain} ${target.describe()} 명중)")
+        System.out.println("${name}가 ${target.name}을 화살로 공격합니다.")
     }
 }
 
-class Griffin(id: String, position: Point) :
-    UnitBase(id, position, isFlying = true), Attacker {
+// Griffin: 날아다님, 지상만 공격(번개 내리침)
+class Griffin(name: String, pos: Point) :
+    UnitBase(name, pos, Domain.AIR), Movable, Attacker {
 
-    override val typeName: String = "Griffin"
-
-    override fun moveTo(point: Point) {
-        println("${describe()}이(가) 날아서 ${position}에서 ${point}로 이동합니다.")
-        position = point
+    override fun moveTo(target: Point) {
+        position = target
+        System.out.println("${name}가 날아서 (${target.x}, ${target.y})로 이동합니다.")
     }
 
     override fun attack(target: UnitBase) {
-        if (target.isFlying) {
-            println("${describe()} → ${target.describe()} : 공격할 수 없습니다 (Griffin은 하늘의 적을 공격 불가).")
+        if (target.domain == Domain.AIR) {
+            System.out.println("${name}가 ${target.name}을 공격할 수 없습니다. (공중 유닛)")
             return
         }
-        println("${describe()}이(가) 하늘에서 번개를 내려쳐 ${target.describe()}를 타격합니다!")
+        System.out.println("${name}가 ${target.name}에게 번개를 내리칩니다.")
     }
 }
 
-class Shuttle(id: String, position: Point) :
-    UnitBase(id, position, isFlying = true) {
+// Shuttle: 비행, 공격 불가, Knight/Archer 탑승 최대 8
+class Shuttle(name: String, pos: Point) :
+    UnitBase(name, pos, Domain.AIR), Movable {
 
-    override val typeName: String = "Shuttle"
-
-    private val capacity = 8
     private val passengers = mutableListOf<UnitBase>()
+    private val capacity = 8
 
-    override fun moveTo(point: Point) {
-        println("${describe()}이(가) 날아서 ${position}에서 ${point}로 이동합니다. (탑승 인원: ${passengers.size}명)")
-        position = point
-        // 탑승객 위치도 함께 이동(공중 수송)
-        passengers.forEach { it.position = point }
+    fun board(unit: UnitBase) {
+        if (passengers.size >= capacity) {
+            System.out.println("${name}는 더 이상 탑승할 수 없습니다. (정원 $capacity)")
+            return
+        }
+        passengers += unit
+        System.out.println("${unit.name}가 ${name}에 탑승합니다.")
     }
 
-    fun board(unit: UnitBase): Boolean {
-        // 탑승 가능: Knight, Archer (과제 명세)
-        if (unit is Knight || unit is Archer) {
-            if (passengers.size >= capacity) {
-                println("${describe()} : 탑승 실패 - 정원 초과(최대 $capacity 명).")
-                return false
-            }
-            passengers += unit
-            println("${unit.describe()}가 ${describe()}에 탑승합니다. (현재 ${passengers.size}/$capacity)")
-            return true
-        } else {
-            println("${describe()} : ${unit.describe()}는 탑승할 수 없습니다.")
-            return false
-        }
+    override fun moveTo(target: Point) {
+        position = target
+        System.out.println("${name}가 날아서 (${target.x}, ${target.y})로 이동합니다.")
     }
 
-    fun disembarkAll(): List<UnitBase> {
-        if (passengers.isEmpty()) {
-            println("${describe()} : 내릴 탑승객이 없습니다.")
-            return emptyList()
-        }
-        println("${describe()} : 모든 탑승객 하차를 시작합니다.")
-        val list = passengers.toList()
+    fun disembarkAll() {
+        System.out.println("${name} : 모든 승객을 내립니다.")
+        val copy = passengers.toList()
         passengers.clear()
-        list.forEach {
-            // 하차 위치는 셔틀의 현재 위치
-            println("${it.describe()}가 ${describe()}에서 하차합니다. 위치=${position}")
-            it.position = position
+        copy.forEach {
+            it.position = this.position
+            System.out.println("${it.name}가 내립니다.")
         }
-        return list
     }
-
-    fun passengerCount(): Int = passengers.size
 }
