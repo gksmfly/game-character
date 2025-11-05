@@ -98,7 +98,8 @@ plugins { application } 와 application { mainClass.set("rts.MainKt") } 가 설�
 
 #### 구조도
 
-```mermaidclassDiagram
+```mermaid
+classDiagram
 direction LR
 
 class Point { +x: Int; +y: Int }
