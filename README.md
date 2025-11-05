@@ -58,15 +58,20 @@ game-character/
 
 ### 5. 실행 방법
 
-#### 프로젝트 빌드
-```bash
-# 프로젝트 최상위 폴더에서
+#### 사전 조건
+사전 조건: build.gradle.kts에
+plugins { application } 와 application { mainClass.set("rts.MainKt") } 가 설정되어 있어야 합니다. (패키지 rts 기준)
+
+#### A) Gradle로 바로 실행(권장)
+```
 ./gradlew clean build
+./gradlew run
 ```
 
-#### 실행
-```bash
-java -jar build/libs/convenience-store-system-1.0.0.jar
+#### B) 배포 스크립트로 실행
+```
+./gradlew installDist
+./build/install/game-character/bin/game-character   # Win: ...\bin\game-character.bat
 ```
 
 ---
