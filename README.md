@@ -96,48 +96,7 @@ plugins { application } 와 application { mainClass.set("rts.MainKt") } 가 설�
 - **정원 제약:** `Shuttle.capacity = 8`을 초과하면 탑승 거부(출력 로그로 검증)
 - **도메인 판정:** `Domain.GROUND/AIR`로 공격 가능 여부를 단순·명확하게 결정
 
----
- 
-### 7. 실행 시나리오(검증용)
-
-아래 시나리오가 `./gradlew run` 실행 시 **한글로 `System.out.println`** 로그로 출력됩니다.
-
-#### 시나리오 개요
-1. (0,0)에서 시작 좌표 설정 → 목표 지점 (10,10)
-2. 유닛 생성: Knight 16기, Archer 16기, Shuttle 4대, Griffin 5기
-3. 탑승: Knight/Archer 32기를 **라운드 로빈**으로 4대 Shuttle에 배치(정원 8)
-4. 이동: Shuttle/Griffin이 (10,10)으로 이동
-5. 하차: 모든 Shuttle에서 승객 하차
-6. 전투:  
-   - Knight: 지상만 공격(공중 공격 불가)  
-   - Archer: 지상/공중 모두 공격 가능  
-   - Griffin: 지상만 공격(공중 공격 불가)
-
-#### 실행 로그 (발췌)
-```text
-=== RTS 게임 캐릭터 시뮬레이션 시작 ===
-[1] Knight 16기, Archer 16기 생성. Shuttle 4대, Griffin 5기 생성.
-[2] 셔틀 탑승 단계
-Knight1가 Shuttle1에 탑승합니다.
-...
-Shuttle1 : 모든 승객을 내립니다.
-Knight1가 내립니다.
-Archer1가 내립니다.
-...
-[3] Griffin 5기와 함께 목표 지점으로 이동
-Shuttle1가 날아서 (10, 10)로 이동합니다.
-Griffin1가 날아서 (10, 10)로 이동합니다.
-...
-[5-1] Knight의 공격
-Knight1가 Griffin1을 공격할 수 없습니다. (공중 유닛)
-[5-2] Archer의 공격
-Archer1가 Griffin1을 화살로 공격합니다.
-[5-3] Griffin의 공격
-Griffin1가 Shuttle1을 공격할 수 없습니다. (공중 유닛)
-=== 시뮬레이션 종료 ===
-```
-
-### 구조도
+#### 구조도
 
 ```mermaid
 classDiagram
@@ -212,3 +171,43 @@ UnitFactory --> Archer : creates
 UnitFactory --> Griffin : creates
 UnitFactory --> Shuttle : creates
 
+---
+ 
+### 7. 실행 시나리오(검증용)
+
+아래 시나리오가 `./gradlew run` 실행 시 **한글로 `System.out.println`** 로그로 출력됩니다.
+
+#### 시나리오 개요
+1. (0,0)에서 시작 좌표 설정 → 목표 지점 (10,10)
+2. 유닛 생성: Knight 16기, Archer 16기, Shuttle 4대, Griffin 5기
+3. 탑승: Knight/Archer 32기를 **라운드 로빈**으로 4대 Shuttle에 배치(정원 8)
+4. 이동: Shuttle/Griffin이 (10,10)으로 이동
+5. 하차: 모든 Shuttle에서 승객 하차
+6. 전투:  
+   - Knight: 지상만 공격(공중 공격 불가)  
+   - Archer: 지상/공중 모두 공격 가능  
+   - Griffin: 지상만 공격(공중 공격 불가)
+
+#### 실행 로그 (발췌)
+```text
+=== RTS 게임 캐릭터 시뮬레이션 시작 ===
+[1] Knight 16기, Archer 16기 생성. Shuttle 4대, Griffin 5기 생성.
+[2] 셔틀 탑승 단계
+Knight1가 Shuttle1에 탑승합니다.
+...
+Shuttle1 : 모든 승객을 내립니다.
+Knight1가 내립니다.
+Archer1가 내립니다.
+...
+[3] Griffin 5기와 함께 목표 지점으로 이동
+Shuttle1가 날아서 (10, 10)로 이동합니다.
+Griffin1가 날아서 (10, 10)로 이동합니다.
+...
+[5-1] Knight의 공격
+Knight1가 Griffin1을 공격할 수 없습니다. (공중 유닛)
+[5-2] Archer의 공격
+Archer1가 Griffin1을 화살로 공격합니다.
+[5-3] Griffin의 공격
+Griffin1가 Shuttle1을 공격할 수 없습니다. (공중 유닛)
+=== 시뮬레이션 종료 ===
+```
