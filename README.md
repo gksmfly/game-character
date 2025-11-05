@@ -52,6 +52,7 @@ game-character/
 │           ├─ Units.kt
 │           └─ Main.kt
 └─ README.md
+```
 
 ---
 
