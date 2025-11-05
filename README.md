@@ -103,7 +103,8 @@ plugins { application } 와 application { mainClass.set("rts.MainKt") } 가 설�
    - Archer: 지상/공중 모두 공격 가능  
    - Griffin: 지상만 공격(공중 공격 불가)
 
-#### 기대 로그 (발췌)
+#### 실행 로그 (발췌)
+```text
 === RTS 게임 캐릭터 시뮬레이션 시작 ===
 [1] Knight 16기, Archer 16기 생성. Shuttle 4대, Griffin 5기 생성.
 [2] 셔틀 탑승 단계
@@ -124,4 +125,4 @@ Archer1가 Griffin1을 화살로 공격합니다.
 [5-3] Griffin의 공격
 Griffin1가 Shuttle1을 공격할 수 없습니다. (공중 유닛)
 === 시뮬레이션 종료 ===
-
+```
