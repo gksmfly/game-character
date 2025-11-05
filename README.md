@@ -77,6 +77,6 @@ java -jar build/libs/convenience-store-system-1.0.0.jar
 |--------------------------------|-------------------------------------------------------------------------------------------------|
 | Abstraction (추상화)           | 공통 행위를 `Movable`(이동), `Attacker`(공격) 인터페이스로 분리                                 |
 | Encapsulation (캡슐화)         | `Shuttle`의 탑승자 목록을 `private`로 은닉, `board()`/`disembark()`로만 상태 변경               |
-| Inheritance (상속)             | `UnitBase` 상속으로 공통 속성(`name`, `position`)과 기본 행위(`moveTo`) 재사용                  |
+| Inheritance (상속)             | UnitBase 상속으로 공통 속성(name, position, domain) 재사용, 이동/공격 행위는 인터페이스(Movable/Attacker) 계약에 따라 하위 클래스에서 구현                 |
 | Polymorphism (다형성)          | 각 유닛이 `moveTo`/`attack`를 오버라이드하여 다른 로직을 같은 방식으로 호출                     |
 | SRP / OCP (단일 책임/개방-폐쇄)| 규칙은 각 클래스에 단일 책임으로 배치, 새 유닛 추가 시 기존 코드 수정 없이 확장 가능            |
