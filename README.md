@@ -170,6 +170,7 @@ UnitFactory --> Knight : creates
 UnitFactory --> Archer : creates
 UnitFactory --> Griffin : creates
 UnitFactory --> Shuttle : creates
+```
 
 ---
  
