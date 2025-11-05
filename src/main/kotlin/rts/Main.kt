@@ -1,68 +1,62 @@
-package rts.rts
+package rts
 
 fun main() {
-    println("=== RTS 게임 캐릭터 시뮬레이션 시작 ===")
+    System.out.println("=== RTS 게임 캐릭터 시뮬레이션 시작 ===")
 
     val start = Point(0, 0)
-    val target = Point(100, 50)
+    val target = Point(10, 10) // 슬라이드 예시 좌표
 
-    // 유닛 생성
-    val knights = (1..16).map { Knight("K%02d".format(it), start) }
-    val archers = (1..16).map { Archer("A%02d".format(it), start) }
-    val shuttles = (1..4).map { Shuttle("S%02d".format(it), start) }
-    val griffins = (1..5).map { Griffin("G%02d".format(it), start) }
+    // [1] 유닛 생성
+    val knights  = (1..16).map { Knight("Knight$it",  start) }
+    val archers  = (1..16).map { Archer("Archer$it",  start) }
+    val shuttles = (1..4).map  { Shuttle("Shuttle$it", start) }
+    val griffins = (1..5).map  { Griffin("Griffin$it", start) }
 
-    println("\n[1] Knight 16기, Archer 16기 생성 완료. Shuttle 4대, Griffin 5기 생성 완료.")
+    System.out.println("[1] Knight 16기, Archer 16기 생성. Shuttle 4대, Griffin 5기 생성.")
 
-    // [2] 셔틀 4대에 Knight/Archer 총 32기 탑승 (셔틀 당 최대 8명)
-    println("\n[2] 셔틀 탑승 단계")
-    val groundTroops = knights + archers // 32기
-    var idx = 0
-    for (unit in groundTroops) {
-        // 라운드 로빈으로 4대에 분배
+    // [2] 셔틀 탑승 (라운드로빈, 최대 8명/대)
+    System.out.println("[2] 셔틀 탑승 단계")
+    val groundTroops = knights + archers
+    groundTroops.forEachIndexed { idx, unit ->
         val shuttle = shuttles[idx % shuttles.size]
         shuttle.board(unit)
-        idx++
     }
-    shuttles.forEach { println("${it.describe()} 현재 탑승 인원: ${it.passengerCount()}명") }
 
-    // [3] Griffin 5기와 함께 일정 거리(target)로 이동
-    println("\n[3] Griffin 5기와 함께 목표 지점으로 이동")
+    // [3] Griffin 5기와 함께 목표 지점으로 이동
+    System.out.println("[3] Griffin 5기와 함께 목표 지점으로 이동")
     shuttles.forEach { it.moveTo(target) }
     griffins.forEach { it.moveTo(target) }
 
-    // [4] 이동 지역에서 셔틀에 탄 모든 캐릭터를 내린다
-    println("\n[4] 셔틀 하차 단계")
+    // [4] 이동 지역에서 모든 탑승객 하차
+    System.out.println("[4] 셔틀 하차 단계")
     shuttles.forEach { it.disembarkAll() }
 
-    // [5] 전투 시나리오
-    println("\n[5] 전투 시나리오 시작")
-    val knight1 = knights.first()
-    val knight2 = knights[1]
-    val archer1 = archers.first()
-    val griffin1 = griffins.first()
-    val shuttle1 = shuttles.first()
+    // [5] 전투 시나리오 (슬라이드 2페이지 지시 그대로)
+    System.out.println("[5] 전투 시나리오 시작")
 
-    // Knight 1기가 Knight/Archer/Griffin/Shuttle 각각 공격
-    println("\n[5-1] Knight의 공격")
-    knight1.attack(knight2)
-    knight1.attack(archer1)
-    knight1.attack(griffin1) // 불가 (공중)
-    knight1.attack(shuttle1) // 불가 (공중)
+    val k1 = knights[0]
+    val k2 = knights[1]
+    val a1 = archers[0]
+    val g1 = griffins[0]
+    val s1 = shuttles[0]
 
-    // Archer 1기가 Archer/Knight/Griffin/Shuttle 각각 공격
-    println("\n[5-2] Archer의 공격")
-    archer1.attack(archer1)  // 자기 자신 공격 시나리오는 지시서에 '다른' 이라고 했지만, 데모로 출력
-    archer1.attack(knight2)
-    archer1.attack(griffin1) // 가능 (공중)
-    archer1.attack(shuttle1) // 가능 (공중)
+    System.out.println("[5-1] Knight의 공격")
+    k1.attack(k2)   // Knight1 -> Knight2
+    k1.attack(a1)   // Knight1 -> Archer1
+    k1.attack(g1)   // 공중 불가
+    k1.attack(s1)   // 공중 불가
 
-    // Griffin 1기가 Griffin/Archer/Knight/Shuttle 각각 공격
-    println("\n[5-3] Griffin의 공격")
-    griffin1.attack(griffins[1]) // 불가 (공중)
-    griffin1.attack(archer1)     // 가능 (지상)
-    griffin1.attack(knight2)     // 가능 (지상)
-    griffin1.attack(shuttle1)    // 불가 (공중)
+    System.out.println("[5-2] Archer의 공격")
+    a1.attack(archers[1]) // Archer1 -> Archer2
+    a1.attack(k2)         // Archer1 -> Knight2
+    a1.attack(g1)         // Archer1 -> Griffin1
+    a1.attack(s1)         // Archer1 -> Shuttle1
 
-    println("\n=== 시뮬레이션 종료 ===")
+    System.out.println("[5-3] Griffin의 공격")
+    g1.attack(griffins[1]) // 공중 불가
+    g1.attack(a1)          // 지상
+    g1.attack(k2)          // 지상
+    g1.attack(s1)          // 공중 불가
+
+    System.out.println("=== 시뮬레이션 종료 ===")
 }
