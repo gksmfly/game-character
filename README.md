@@ -98,17 +98,15 @@ plugins { application } 와 application { mainClass.set("rts.MainKt") } 가 설�
 
 #### 구조도
 
-```mermaid
-classDiagram
+```mermaidclassDiagram
 direction LR
 
-%% ===== 기초 타입 =====
 class Point { +x: Int; +y: Int }
 class Domain { <<enum>> GROUND; AIR }
 class Race { <<enum>> HUMAN; FANTASY; AIRBORNE }
 
-%% ===== 추상/인터페이스 =====
 class UnitBase {
+  <<abstract>>
   - name: String
   - position: Point
   - domain: Domain
@@ -116,10 +114,9 @@ class UnitBase {
   + attack(target: UnitBase)
 }
 
-class Movable { <<interface>> +move(from: Point, to: Point) }
-class Attacker { <<interface>> +attack(self: UnitBase, target: UnitBase) }
+class Movable { <<interface>> }
+class Attacker { <<interface>> }
 
-%% ===== 전략(Strategy) =====
 class Walk
 class Ride
 class Fly
@@ -134,15 +131,14 @@ Attacker <|.. Melee
 Attacker <|.. Arrow
 Attacker <|.. NoAttack
 
-%% ===== 유닛 =====
 class Knight
 class Archer
 class Griffin
 class Shuttle {
-  - capacity: Int = 8
-  - passengers: MutableList<UnitBase>
+  - capacity: Int
+  - passengers: MutableList~UnitBase~
   + board(u: UnitBase)
-  + disembarkAll(): List<UnitBase>
+  + disembarkAll(): List~UnitBase~
 }
 
 UnitBase <|-- Knight
@@ -150,26 +146,26 @@ UnitBase <|-- Archer
 UnitBase <|-- Griffin
 UnitBase <|-- Shuttle
 
-Knight --> Movable
-Knight --> Attacker
-Archer --> Movable
-Archer --> Attacker
-Griffin --> Movable
-Griffin --> Attacker
-Shuttle --> Movable
-Shuttle --> Attacker
+Knight ..> Movable
+Knight ..> Attacker
+Archer ..> Movable
+Archer ..> Attacker
+Griffin ..> Movable
+Griffin ..> Attacker
+Shuttle ..> Movable
+Shuttle ..> Attacker
 
-%% ===== Factory =====
 class UnitFactory {
   + createUnit(type: String, race: Race, position: Point): UnitBase
   + createTransport(race: Race, position: Point): Shuttle
 }
 
-UnitFactory --> Race
-UnitFactory --> Knight : creates
-UnitFactory --> Archer : creates
-UnitFactory --> Griffin : creates
-UnitFactory --> Shuttle : creates
+UnitFactory ..> Race
+UnitFactory ..> Knight : creates
+UnitFactory ..> Archer : creates
+UnitFactory ..> Griffin : creates
+UnitFactory ..> Shuttle : creates
+
 ```
 
 ---
