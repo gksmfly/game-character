@@ -89,6 +89,7 @@ plugins { application } 와 application { mainClass.set("rts.MainKt") } 가 설�
 | Inheritance (상속)             | UnitBase 상속으로 공통 속성(name, position, domain) 재사용, 이동/공격 행위는 인터페이스(Movable/Attacker) 계약에 따라 하위 클래스에서 구현                 |
 | Polymorphism (다형성)          | 각 유닛이 `moveTo`/`attack`를 오버라이드하여 다른 로직을 같은 방식으로 호출                     |
 | SRP / OCP (단일 책임/개방-폐쇄)| 규칙은 각 클래스에 단일 책임으로 배치, 새 유닛 추가 시 기존 코드 수정 없이 확장 가능            |
+| Strategy (전략 패턴) | 이동·공격 로직을 Movable·Attacker 인터페이스로 분리하고, Walk/Ride/Fly, Melee/Arrow/NoAttack 전략을 주입해 유닛별 행동을 구성. 전략 교체만으로 확장(OCP), 불필요한 메서드 구현 제거로 ISP 준수 |
 
 #### 알고리즘 포인트
 - **라운드 로빈 균등 배치:** `idx % shuttles.size`로 32기를 4대 Shuttle에 고르게 분산
