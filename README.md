@@ -39,6 +39,7 @@
 
 ### 4. 프로젝트 구조
 
+```text
 game-character/
 ├─ build.gradle.kts
 ├─ settings.gradle.kts
