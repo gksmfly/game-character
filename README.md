@@ -1,145 +1,133 @@
-**RTS(Real-Time Strategy) 게임 캐릭터 시뮬레이션 과제**
+
+# RTS(Real‑Time Strategy) 게임 캐릭터 시뮬레이션
 
 > **과제명:** *게임 캐릭터와 행동 만들기 (homework02_GameCharacter.pdf)*  
 > **제출 형태:** *Gradle 프로젝트 (gradle build / gradle run 가능 상태)*  
-> **작성 언어:** **Kotlin**
+> **언어/런타임:** **Kotlin** (JVM)
 
 ---
 
-### 1. 프로젝트 개요
+## 1) 프로젝트 개요
 
-중세시대를 배경으로 한 RTS 게임을 가정하여  
-캐릭터(**Knight, Archer, Shuttle, Griffin**)의 **이동 · 공격 · 탑승** 동작을  
-객체지향적으로 설계하고 구현한 프로그램입니다.
-
----
-
-### 2. 구현 요구사항 요약
-
-- **캐릭터 종류 및 규칙**
-    - **Knight**: 말을 타고 이동, **지상만 공격 가능** (공중 유닛 공격 불가)
-    - **Archer**: 걸어서 이동(느림), **지상/공중 모두 공격 가능**
-    - **Griffin**: 날아서 이동, **하늘에서 지상만 공격**
-    - **Shuttle**: 비행 유닛, **공격 불가**, Knight/Archer **최대 8기 탑승 가능**
-- **탑승 분배 규칙**
-  - Knight/Archer 32기는 **라운드 로빈(ROUND-ROBIN)** 으로 4대 Shuttle에 **균등 배치**
-  - 분배 공식: i번째 병사는 **`i % 4`** 번째 Shuttle에 탑승
-  - **정원 준수:** Shuttle 1대당 최대 **8명**
-- 모든 행동은 `println`으로 **한글 메시지** 출력
-- 각 캐릭터의 동작 규칙은 **다형성**으로 처리 (오버라이드)
+중세 RTS를 가정하여 캐릭터(**Knight, Archer, Shuttle, Griffin**)의 **이동 · 공격 · 탑승**을 객체지향적으로 설계/구현합니다.  
+PDF 명세의 필수 규칙을 만족하고, 설계 평가지표(중복 최소화/재사용/확장성)를 위해 **전략 패턴**과 **팩토리**를 사용했습니다.
 
 ---
 
-### 3. 개발 환경
+## 2) 실행 방법
 
-| 항목 | 버전 |
-|---|---|
-| **JDK** | 24 (OpenJDK 24.0.2) |
-| **Kotlin** | 2.2.0 |
-| **Gradle DSL** | Kotlin |
-| **IDE** | IntelliJ IDEA 2024.2 이상 |
-
----
-
-### 4. 프로젝트 구조
-
-```text
-game-character/
-├─ build.gradle.kts
-├─ settings.gradle.kts
-├─ src/
-│  └─ main/
-│     └─ kotlin/
-│        └─ rts/
-│           ├─ Point.kt
-│           ├─ Abstractions.kt
-│           ├─ Units.kt
-│           └─ Main.kt
-└─ README.md
+### A) Gradle (권장)
+`build.gradle.kts` 에 다음이 설정되어 있어야 합니다.
+```kotlin
+plugins {
+    application
+    kotlin("jvm") version "1.9.0" // 프로젝트 버전에 맞추세요
+}
+application {
+    mainClass.set("hw2.game.MainKt")
+}
 ```
 
----
-
-### 5. 실행 방법
-
-#### 사전 조건
-사전 조건: build.gradle.kts에
-plugins { application } 와 application { mainClass.set("rts.MainKt") } 가 설정되어 있어야 합니다. (패키지 rts 기준)
-
-#### A) Gradle로 바로 실행(권장)
-```
-./gradlew clean build
+실행:
+```bash
 ./gradlew run
 ```
 
-#### B) 배포 스크립트로 실행
-```
+### B) 배포 스크립트
+```bash
 ./gradlew installDist
-./build/install/game-character/bin/game-character   # Win: ...\bin\game-character.bat
+./build/install/game-character/bin/game-character   # (Windows: ...\bin\game-character.bat)
 ```
+---
+
+## 3) 패키지/파일 구조
+
+```
+src/
+└─ main/
+   └─ kotlin/rts/
+      ├─ Point.kt
+      ├─ Abstractions.kt
+      ├─ Strategies.kt
+      ├─ Units.kt
+      └─ Main.kt
+```
+
+## 5) 설계(아키텍처) 개요
+
+### 5.1 전략 패턴(필수 아님, 본 프로젝트는 적용 ✅)
+- **이동 / 공격**을 각각 `MoveStrategy` / `AttackStrategy`로 분리  
+- 각 유닛은 생성 시 전략을 **주입**받아 동작 (조건문 최소화, 확장 용이)
+
+### 5.2 팩토리(필수 아님, 본 프로젝트는 적용 ✅)
+- `UnitFactory`에서 유닛 생성/전략 조합을 일원화 (일관성, 테스트 용이)
+
+### 5.3 인터페이스 분리 & 캡슐화
+- 역할별 인터페이스: `Movable`, `Attacker`  
+- `UnitBase.position`은 읽기 전용(`val` getter), 내부 `relocate(...)`로만 변경  
+- `Shuttle.board(...)`에서 타입/정원/중복을 체크, `carrier` 상태 추적
 
 ---
 
-### 6. 객체지향 설계 포인트
-
-| 원칙                           | 적용 내용                                                                                      |
-|--------------------------------|-------------------------------------------------------------------------------------------------|
-| Abstraction (추상화)           | 공통 행위를 `Movable`(이동), `Attacker`(공격) 인터페이스로 분리                                 |
-| Encapsulation (캡슐화)         | `Shuttle`의 탑승자 목록을 `private`로 은닉, `board()`/`disembarkAll()`로만 상태 변경               |
-| Inheritance (상속)             | UnitBase 상속으로 공통 속성(name, position, domain) 재사용, 이동/공격 행위는 인터페이스(Movable/Attacker) 계약에 따라 하위 클래스에서 구현                 |
-| Polymorphism (다형성)          | 각 유닛이 `moveTo`/`attack`를 오버라이드하여 다른 로직을 같은 방식으로 호출                     |
-| SRP / OCP (단일 책임/개방-폐쇄)| 규칙은 각 클래스에 단일 책임으로 배치, 새 유닛 추가 시 기존 코드 수정 없이 확장 가능            |
-| Strategy (전략 패턴) | 이동·공격 로직을 Movable·Attacker 인터페이스로 분리하고, Walk/Ride/Fly, Melee/Arrow/NoAttack 전략을 주입해 유닛별 행동을 구성. 전략 교체만으로 확장(OCP), 불필요한 메서드 구현 제거로 ISP 준수 |
-
-#### 알고리즘 포인트
-- **라운드 로빈 균등 배치:** `idx % shuttles.size`로 32기를 4대 Shuttle에 고르게 분산
-- **정원 제약:** `Shuttle.capacity = 8`을 초과하면 탑승 거부(출력 로그로 검증)
-- **도메인 판정:** `Domain.GROUND/AIR`로 공격 가능 여부를 단순·명확하게 결정
-
-#### 구조도
+## 6) 클래스 다이어그램 (Mermaid)
 
 ```mermaid
 classDiagram
 direction LR
 
-class Point { +x: Int; +y: Int }
-class Domain { <<enum>> GROUND; AIR }
-class Race { <<enum>> HUMAN; FANTASY; AIRBORNE }
+class Point
+Point : +x : Int
+Point : +y : Int
 
-class UnitBase {
-  <<abstract>>
-  - name: String
-  - position: Point
-  - domain: Domain
-  + moveTo(target: Point)
-  + attack(target: UnitBase)
+class Domain
+<<enumeration>> Domain
+Domain : GROUND
+Domain : AIR
+
+class Movable {
+  <<interface>>
+  +moveTo(target: Point) : Unit
+}
+class Attacker {
+  <<interface>>
+  +attack(target: UnitBase) : Unit
 }
 
-class Movable { <<interface>> }
-class Attacker { <<interface>> }
+class MoveStrategy {
+  <<interface>>
+  +move(self: UnitBase, to: Point) : Unit
+}
+class AttackStrategy {
+  <<interface>>
+  +attack(self: UnitBase, target: UnitBase) : Unit
+}
 
-class Walk
-class Ride
-class Fly
-class Melee
-class Arrow
-class NoAttack
+class UnitBase {
+  +name : String
+  +position : Point
+  +domain : Domain
+  +carrier : Shuttle?
+  +setMoveStrategy(s: MoveStrategy?) : Unit
+  +setAttackStrategy(s: AttackStrategy?) : Unit
+  +moveTo(target: Point) : Unit
+  +attack(target: UnitBase) : Unit
+  -relocate(to: Point) : Unit
+  -setCarrier(s: Shuttle?) : Unit
+}
 
-Movable <|.. Walk
-Movable <|.. Ride
-Movable <|.. Fly
-Attacker <|.. Melee
-Attacker <|.. Arrow
-Attacker <|.. NoAttack
+Movable <|.. UnitBase
+Attacker <|.. UnitBase
+UnitBase ..> MoveStrategy
+UnitBase ..> AttackStrategy
 
 class Knight
 class Archer
 class Griffin
 class Shuttle {
-  - capacity: Int
-  - passengers: MutableList~UnitBase~
-  + board(u: UnitBase)
-  + disembarkAll(): List~UnitBase~
+  +capacity : Int
+  +board(u: UnitBase) : Boolean
+  +disembarkAll() : List<UnitBase>
+  +passengerCount() : Int
 }
 
 UnitBase <|-- Knight
@@ -147,65 +135,128 @@ UnitBase <|-- Archer
 UnitBase <|-- Griffin
 UnitBase <|-- Shuttle
 
-Knight ..> Movable
-Knight ..> Attacker
-Archer ..> Movable
-Archer ..> Attacker
-Griffin ..> Movable
-Griffin ..> Attacker
-Shuttle ..> Movable
-Shuttle ..> Attacker
+class WalkMove
+class RideMove
+class FlyMove
+class MeleeAttack
+class ArrowAttack
+class NoAttack
+class GriffinClawAttack
+
+MoveStrategy <|.. WalkMove
+MoveStrategy <|.. RideMove
+MoveStrategy <|.. FlyMove
+AttackStrategy <|.. MeleeAttack
+AttackStrategy <|.. ArrowAttack
+AttackStrategy <|.. NoAttack
+AttackStrategy <|.. GriffinClawAttack
 
 class UnitFactory {
-  + createUnit(type: String, race: Race, position: Point): UnitBase
-  + createTransport(race: Race, position: Point): Shuttle
+  +createKnight(i:Int, p:Point) : Knight
+  +createArcher(i:Int, p:Point) : Archer
+  +createGriffin(i:Int, p:Point) : Griffin
+  +createShuttle(i:Int, p:Point, cap:Int=8) : Shuttle
 }
-
-UnitFactory ..> Race
-UnitFactory ..> Knight : creates
-UnitFactory ..> Archer : creates
-UnitFactory ..> Griffin : creates
-UnitFactory ..> Shuttle : creates
-
 ```
 
 ---
- 
-### 7. 실행 시나리오(검증용)
 
-아래 시나리오가 `./gradlew run` 실행 시 **한글로 `System.out.println`** 로그로 출력됩니다.
+## 7) 시퀀스 다이어그램(주요 시나리오)
 
-#### 시나리오 개요
-1. (0,0)에서 시작 좌표 설정 → 목표 지점 (10,10)
-2. 유닛 생성: Knight 16기, Archer 16기, Shuttle 4대, Griffin 5기
-3. 탑승: Knight/Archer 32기를 **라운드 로빈**으로 4대 Shuttle에 배치(정원 8)
-4. 이동: Shuttle/Griffin이 (10,10)으로 이동
-5. 하차: 모든 Shuttle에서 승객 하차
-6. 전투:  
-   - Knight: 지상만 공격(공중 공격 불가)  
-   - Archer: 지상/공중 모두 공격 가능  
-   - Griffin: 지상만 공격(공중 공격 불가)
+### 7.1 수송/이동/하차
+```mermaid
+sequenceDiagram
+autonumber
+participant Main
+participant S as Shuttle1
+participant K as Knight1
+participant A as Archer1
+participant G as Griffin1
 
-#### 실행 로그 (발췌)
-```text
-=== RTS 게임 캐릭터 시뮬레이션 시작 ===
-[1] Knight 16기, Archer 16기 생성. Shuttle 4대, Griffin 5기 생성.
-[2] 셔틀 탑승 단계
-Knight1가 Shuttle1에 탑승합니다.
-...
-Shuttle1 : 모든 승객을 내립니다.
-Knight1가 내립니다.
-Archer1가 내립니다.
-...
-[3] Griffin 5기와 함께 목표 지점으로 이동
-Shuttle1가 날아서 (10, 10)로 이동합니다.
-Griffin1가 날아서 (10, 10)로 이동합니다.
-...
-[5-1] Knight의 공격
-Knight1가 Griffin1을 공격할 수 없습니다. (공중 유닛)
-[5-2] Archer의 공격
-Archer1가 Griffin1을 화살로 공격합니다.
-[5-3] Griffin의 공격
-Griffin1가 Shuttle1을 공격할 수 없습니다. (공중 유닛)
-=== 시뮬레이션 종료 ===
+Main->>S: board(K)
+S-->>Main: true
+Main->>S: board(A)
+S-->>Main: true
+Main->>S: moveTo(target)
+Main->>G: moveTo(target)
+Main->>S: disembarkAll()
 ```
+
+### 7.2 공격 12건(Shuttle 포함)
+```mermaid
+sequenceDiagram
+autonumber
+participant Main
+participant K1 as Knight1
+participant A1 as Archer1
+participant G1 as Griffin1
+participant S1 as Shuttle1
+
+%% Knight
+Main->>K1: attack(Knight2)   %% 가능
+Main->>K1: attack(Archer1)   %% 가능
+Main->>K1: attack(G1)        %% 불가(공중)
+Main->>K1: attack(S1)        %% 불가(공중)
+
+%% Archer
+Main->>A1: attack(Archer2)   %% 가능
+Main->>A1: attack(Knight1)   %% 가능
+Main->>A1: attack(G1)        %% 가능(공중 포함)
+Main->>A1: attack(S1)        %% 가능(공중 포함)
+
+%% Griffin
+Main->>G1: attack(Griffin2)  %% 불가(공중)
+Main->>G1: attack(Archer1)   %% 가능(지상)
+Main->>G1: attack(Knight1)   %% 가능(지상)
+Main->>G1: attack(S1)        %% 불가(공중)
+```
+
+---
+
+## 8) 메인 시나리오 (요약)
+
+1. **생성:** Knight 16, Archer 16, Shuttle 4(정원 8), Griffin 5 (모두 `Point(0,0)`)
+2. **탑승:** Knight/Archer 32명을 셔틀 4대에 **라운드로빈**으로 배치
+3. **이동:** Shuttle 4대 + Griffin 5기가 목표 좌표(`Point(10,10)`)로 이동
+4. **하차:** 탑승객 전원 하차 → 하차 위치 = 셔틀 현재 위치
+5. **공격:** Knight/Archer/Griffin 대표 1기씩 **총 12건**(Shuttle 포함) 호출
+
+> *참고:* 과제 PDF의 “출력은 한글로” 조건에 맞춰 모든 과정이 한글 로그로 출력됩니다.
+
+---
+
+## 9) 테스트 & 예시 로그 (발췌)
+
+```
+=== 이동 시작 ===
+그리핀1가 날아서 (0, 0) → (10, 10) 이동
+셔틀1가 날아서 (0, 0) → (10, 10) 이동
+...
+=== 하차 ===
+궁수1가 셔틀1 에서 내립니다. 위치: (10, 10)
+...
+=== 교차 공격 ===
+기사1가 궁수2을(를) 근접 공격합니다.
+기사1: 공중 유닛(그리핀1)은 근접 공격할 수 없습니다.
+기사1: 공중 유닛(셔틀1)은 근접 공격할 수 없습니다.
+궁수1가 셔틀1을(를) 화살로 공격합니다.
+그리핀1: 공중 유닛(그리핀2)은 갈퀴 공격 불가
+...
+```
+---
+
+## 11) 설계 포인트(요약)
+
+- **전략 패턴**: 이동/공격을 전략으로 분리해 **OCP/재사용성** 확보
+- **팩토리**: 생성/전략 조합을 일원화 → **일관성/테스트 용이**
+- **인터페이스 분리(ISP)**: 필요한 역할만 구현 (Shuttle은 공격 미구현)
+- **캡슐화**: 위치 변경은 내부 메서드로만, 탑승 상태 추적(`carrier`)
+
+---
+
+## 12) 한계/확장 아이디어
+
+- 체력/피해량/사거리 등 전투 시스템 확장
+- 경로 탐색(A*), 장애물, 속도/지형 보정
+- 복수 타겟/에어본 전용 무기 전략 추가(예: BallistaAttack)
+
