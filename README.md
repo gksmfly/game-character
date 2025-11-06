@@ -85,21 +85,25 @@ class Point {
   +y: Int
 }
 
-class Movable
-<<interface>> Movable
-Movable : +moveTo(target: Point)
+class Movable {
+  <<interface>>
+  +moveTo(target: Point)
+}
 
-class Attacker
-<<interface>> Attacker
-Attacker : +attack(target: UnitBase)
+class Attacker {
+  <<interface>>
+  +attack(target: UnitBase)
+}
 
-class MoveStrategy
-<<interface>> MoveStrategy
-MoveStrategy : +move(self: UnitBase, to: Point)
+class MoveStrategy {
+  <<interface>>
+  +move(self: UnitBase, to: Point)
+}
 
-class AttackStrategy
-<<interface>> AttackStrategy
-AttackStrategy : +attack(self: UnitBase, target: UnitBase)
+class AttackStrategy {
+  <<interface>>
+  +attack(self: UnitBase, target: UnitBase)
+}
 
 class UnitBase {
   +name: String
@@ -114,10 +118,10 @@ class UnitBase {
   -setCarrier(s: Shuttle?)
 }
 
-UnitBase ..|> Movable
-UnitBase ..|> Attacker
-UnitBase --> MoveStrategy : uses
-UnitBase --> AttackStrategy : uses
+Movable <|.. UnitBase
+Attacker <|.. UnitBase
+UnitBase ..> MoveStrategy : uses
+UnitBase ..> AttackStrategy : uses
 
 class Knight
 class Archer
