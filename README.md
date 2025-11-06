@@ -1,5 +1,5 @@
 
-# RTS(Real‑Time Strategy) 게임 캐릭터 시뮬레이션
+## RTS(Real‑Time Strategy) 게임 캐릭터 시뮬레이션
 
 > **과제명:** *게임 캐릭터와 행동 만들기 (homework02_GameCharacter.pdf)*  
 > **제출 형태:** *Gradle 프로젝트 (gradle build / gradle run 가능 상태)*  
@@ -7,16 +7,16 @@
 
 ---
 
-## 1) 프로젝트 개요
+### 1) 프로젝트 개요
 
 중세 RTS를 가정하여 캐릭터(**Knight, Archer, Shuttle, Griffin**)의 **이동 · 공격 · 탑승**을 객체지향적으로 설계/구현합니다.  
 PDF 명세의 필수 규칙을 만족하고, 설계 평가지표(중복 최소화/재사용/확장성)를 위해 **전략 패턴**과 **팩토리**를 사용했습니다.
 
 ---
 
-## 2) 실행 방법
+### 2) 실행 방법
 
-### A) Gradle (권장)
+#### A) Gradle (권장)
 `build.gradle.kts` 에 다음이 설정되어 있어야 합니다.
 ```kotlin
 plugins {
@@ -33,14 +33,14 @@ application {
 ./gradlew run
 ```
 
-### B) 배포 스크립트
+#### B) 배포 스크립트
 ```bash
 ./gradlew installDist
 ./build/install/game-character/bin/game-character   # (Windows: ...\bin\game-character.bat)
 ```
 ---
 
-## 3) 패키지/파일 구조
+### 3) 패키지/파일 구조
 
 ```
 src/
@@ -53,36 +53,35 @@ src/
       └─ Main.kt
 ```
 
-## 5) 설계(아키텍처) 개요
+### 4) 설계(아키텍처) 개요
 
-### 5.1 전략 패턴(필수 아님, 본 프로젝트는 적용 ✅)
+#### 4.1 전략 패턴
 - **이동 / 공격**을 각각 `MoveStrategy` / `AttackStrategy`로 분리  
 - 각 유닛은 생성 시 전략을 **주입**받아 동작 (조건문 최소화, 확장 용이)
 
-### 5.2 팩토리(필수 아님, 본 프로젝트는 적용 ✅)
+#### 4.2 팩토리
 - `UnitFactory`에서 유닛 생성/전략 조합을 일원화 (일관성, 테스트 용이)
 
-### 5.3 인터페이스 분리 & 캡슐화
+#### 4.3 인터페이스 분리 & 캡슐화
 - 역할별 인터페이스: `Movable`, `Attacker`  
 - `UnitBase.position`은 읽기 전용(`val` getter), 내부 `relocate(...)`로만 변경  
 - `Shuttle.board(...)`에서 타입/정원/중복을 체크, `carrier` 상태 추적
 
 ---
 
-## 6) 클래스 다이어그램 (Mermaid)
-
+## 5) 클래스 다이어그램
 ```mermaid
 classDiagram
 direction LR
-
-class Point
-Point : +x : Int
-Point : +y : Int
 
 class Domain
 <<enumeration>> Domain
 Domain : GROUND
 Domain : AIR
+
+class Point
+Point : +x : Int
+Point : +y : Int
 
 class Movable {
   <<interface>>
@@ -117,8 +116,8 @@ class UnitBase {
 
 Movable <|.. UnitBase
 Attacker <|.. UnitBase
-UnitBase ..> MoveStrategy
-UnitBase ..> AttackStrategy
+UnitBase ..> MoveStrategy : uses
+UnitBase ..> AttackStrategy : uses
 
 class Knight
 class Archer
@@ -157,63 +156,15 @@ class UnitFactory {
   +createGriffin(i:Int, p:Point) : Griffin
   +createShuttle(i:Int, p:Point, cap:Int=8) : Shuttle
 }
+
+note for Shuttle "정원 8 / Knight·Archer만 탑승"
+note for MeleeAttack "AIR 대상 차단"
+note for GriffinClawAttack "AIR 대상 차단"
 ```
 
 ---
 
-## 7) 시퀀스 다이어그램(주요 시나리오)
-
-### 7.1 수송/이동/하차
-```mermaid
-sequenceDiagram
-autonumber
-participant Main
-participant S as Shuttle1
-participant K as Knight1
-participant A as Archer1
-participant G as Griffin1
-
-Main->>S: board(K)
-S-->>Main: true
-Main->>S: board(A)
-S-->>Main: true
-Main->>S: moveTo(target)
-Main->>G: moveTo(target)
-Main->>S: disembarkAll()
-```
-
-### 7.2 공격 12건(Shuttle 포함)
-```mermaid
-sequenceDiagram
-autonumber
-participant Main
-participant K1 as Knight1
-participant A1 as Archer1
-participant G1 as Griffin1
-participant S1 as Shuttle1
-
-%% Knight
-Main->>K1: attack(Knight2)   %% 가능
-Main->>K1: attack(Archer1)   %% 가능
-Main->>K1: attack(G1)        %% 불가(공중)
-Main->>K1: attack(S1)        %% 불가(공중)
-
-%% Archer
-Main->>A1: attack(Archer2)   %% 가능
-Main->>A1: attack(Knight1)   %% 가능
-Main->>A1: attack(G1)        %% 가능(공중 포함)
-Main->>A1: attack(S1)        %% 가능(공중 포함)
-
-%% Griffin
-Main->>G1: attack(Griffin2)  %% 불가(공중)
-Main->>G1: attack(Archer1)   %% 가능(지상)
-Main->>G1: attack(Knight1)   %% 가능(지상)
-Main->>G1: attack(S1)        %% 불가(공중)
-```
-
----
-
-## 8) 메인 시나리오 (요약)
+## 6) 메인 시나리오 (요약)
 
 1. **생성:** Knight 16, Archer 16, Shuttle 4(정원 8), Griffin 5 (모두 `Point(0,0)`)
 2. **탑승:** Knight/Archer 32명을 셔틀 4대에 **라운드로빈**으로 배치
@@ -225,7 +176,7 @@ Main->>G1: attack(S1)        %% 불가(공중)
 
 ---
 
-## 9) 테스트 & 예시 로그 (발췌)
+## 7) 테스트 & 예시 로그 (발췌)
 
 ```
 === 이동 시작 ===
@@ -245,7 +196,7 @@ Main->>G1: attack(S1)        %% 불가(공중)
 ```
 ---
 
-## 11) 설계 포인트(요약)
+## 8) 설계 포인트(요약)
 
 - **전략 패턴**: 이동/공격을 전략으로 분리해 **OCP/재사용성** 확보
 - **팩토리**: 생성/전략 조합을 일원화 → **일관성/테스트 용이**
@@ -254,9 +205,8 @@ Main->>G1: attack(S1)        %% 불가(공중)
 
 ---
 
-## 12) 한계/확장 아이디어
+## 9) 한계/확장 아이디어
 
 - 체력/피해량/사거리 등 전투 시스템 확장
 - 경로 탐색(A*), 장애물, 속도/지형 보정
 - 복수 타겟/에어본 전용 무기 전략 추가(예: BallistaAttack)
-
