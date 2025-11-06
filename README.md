@@ -74,65 +74,65 @@ src/
 classDiagram
 direction LR
 
-class Domain
-<<enumeration>> Domain
-Domain : GROUND
-Domain : AIR
-
-class Point
-Point : +x : Int
-Point : +y : Int
-
-class Movable {
-  <<interface>>
-  +moveTo(target: Point) : Unit
-}
-class Attacker {
-  <<interface>>
-  +attack(target: UnitBase) : Unit
+class Domain {
+  <<enumeration>>
+  GROUND
+  AIR
 }
 
-class MoveStrategy {
-  <<interface>>
-  +move(self: UnitBase, to: Point) : Unit
+class Point {
+  +x: Int
+  +y: Int
 }
-class AttackStrategy {
-  <<interface>>
-  +attack(self: UnitBase, target: UnitBase) : Unit
-}
+
+class Movable
+<<interface>> Movable
+Movable : +moveTo(target: Point)
+
+class Attacker
+<<interface>> Attacker
+Attacker : +attack(target: UnitBase)
+
+class MoveStrategy
+<<interface>> MoveStrategy
+MoveStrategy : +move(self: UnitBase, to: Point)
+
+class AttackStrategy
+<<interface>> AttackStrategy
+AttackStrategy : +attack(self: UnitBase, target: UnitBase)
 
 class UnitBase {
-  +name : String
-  +position : Point
-  +domain : Domain
-  +carrier : Shuttle?
-  +setMoveStrategy(s: MoveStrategy?) : Unit
-  +setAttackStrategy(s: AttackStrategy?) : Unit
-  +moveTo(target: Point) : Unit
-  +attack(target: UnitBase) : Unit
-  -relocate(to: Point) : Unit
-  -setCarrier(s: Shuttle?) : Unit
+  +name: String
+  +position: Point
+  +domain: Domain
+  +carrier: Shuttle?
+  +setMoveStrategy(s: MoveStrategy?)
+  +setAttackStrategy(s: AttackStrategy?)
+  +moveTo(target: Point)
+  +attack(target: UnitBase)
+  -relocate(to: Point)
+  -setCarrier(s: Shuttle?)
 }
 
-Movable <|.. UnitBase
-Attacker <|.. UnitBase
-UnitBase ..> MoveStrategy : uses
-UnitBase ..> AttackStrategy : uses
+UnitBase ..|> Movable
+UnitBase ..|> Attacker
+UnitBase --> MoveStrategy : uses
+UnitBase --> AttackStrategy : uses
 
 class Knight
 class Archer
 class Griffin
 class Shuttle {
-  +capacity : Int
-  +board(u: UnitBase) : Boolean
-  +disembarkAll() : List<UnitBase>
-  +passengerCount() : Int
+  +capacity: Int
+  +board(u: UnitBase): Boolean
+  +disembarkAll(): List~UnitBase~
+  +passengerCount(): Int
 }
 
-UnitBase <|-- Knight
-UnitBase <|-- Archer
-UnitBase <|-- Griffin
-UnitBase <|-- Shuttle
+Knight --|> UnitBase
+Archer --|> UnitBase
+Griffin --|> UnitBase
+Shuttle --|> UnitBase
 
 class WalkMove
 class RideMove
@@ -142,24 +142,20 @@ class ArrowAttack
 class NoAttack
 class GriffinClawAttack
 
-MoveStrategy <|.. WalkMove
-MoveStrategy <|.. RideMove
-MoveStrategy <|.. FlyMove
-AttackStrategy <|.. MeleeAttack
-AttackStrategy <|.. ArrowAttack
-AttackStrategy <|.. NoAttack
-AttackStrategy <|.. GriffinClawAttack
+WalkMove ..|> MoveStrategy
+RideMove ..|> MoveStrategy
+FlyMove ..|> MoveStrategy
+MeleeAttack ..|> AttackStrategy
+ArrowAttack ..|> AttackStrategy
+NoAttack ..|> AttackStrategy
+GriffinClawAttack ..|> AttackStrategy
 
 class UnitFactory {
-  +createKnight(i:Int, p:Point) : Knight
-  +createArcher(i:Int, p:Point) : Archer
-  +createGriffin(i:Int, p:Point) : Griffin
-  +createShuttle(i:Int, p:Point, cap:Int=8) : Shuttle
+  +createKnight(i: Int, p: Point): Knight
+  +createArcher(i: Int, p: Point): Archer
+  +createGriffin(i: Int, p: Point): Griffin
+  +createShuttle(i: Int, p: Point, cap: Int): Shuttle
 }
-
-note for Shuttle "정원 8 / Knight·Archer만 탑승"
-note for MeleeAttack "AIR 대상 차단"
-note for GriffinClawAttack "AIR 대상 차단"
 ```
 
 ---
