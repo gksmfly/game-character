@@ -162,6 +162,87 @@ class UnitFactory {
 }
 ```
 
+
+```mermaid
+classDiagram
+direction LR
+
+%% --- 핵심 역할 인터페이스 ---
+class Movable {
+  <<interface>>
+  +moveTo(target: Point)
+}
+class Attacker {
+  <<interface>>
+  +attack(target: UnitBase)
+}
+
+%% --- 전략 인터페이스 ---
+class MoveStrategy {
+  <<interface>>
+  +move(self: UnitBase, to: Point)
+}
+class AttackStrategy {
+  <<interface>>
+  +attack(self: UnitBase, target: UnitBase)
+}
+
+%% --- 공통 베이스(상태 캡슐화 + 전략 주입) ---
+class UnitBase {
+  +name: String
+  +position: Point
+  +domain: Domain
+  +setMoveStrategy(s: MoveStrategy?)
+  +setAttackStrategy(s: AttackStrategy?)
+  +moveTo(target: Point)
+  +attack(target: UnitBase)
+}
+
+%% --- 관계(다형성/구성) ---
+Movable <|.. UnitBase
+Attacker <|.. UnitBase
+UnitBase ..> MoveStrategy : uses
+UnitBase ..> AttackStrategy : uses
+
+%% --- 상속(구체 유닛) ---
+class Knight
+class Archer
+class Griffin
+class Shuttle
+Knight --|> UnitBase
+Archer --|> UnitBase
+Griffin --|> UnitBase
+Shuttle --|> UnitBase
+
+%% --- 전략 구현체 ---
+class WalkMove
+class RideMove
+class FlyMove
+class MeleeAttack
+class ArrowAttack
+class NoAttack
+class GriffinClawAttack
+WalkMove ..|> MoveStrategy
+RideMove ..|> MoveStrategy
+FlyMove ..|> MoveStrategy
+MeleeAttack ..|> AttackStrategy
+ArrowAttack ..|> AttackStrategy
+NoAttack ..|> AttackStrategy
+GriffinClawAttack ..|> AttackStrategy
+
+%% --- 생성 책임(팩토리) ---
+class UnitFactory {
+  +createKnight(i: Int, p: Point): Knight
+  +createArcher(i: Int, p: Point): Archer
+  +createGriffin(i: Int, p: Point): Griffin
+  +createShuttle(i: Int, p: Point, cap: Int): Shuttle
+}
+
+%% --- 참조 타입(간단 선언만; 상세 속성은 생략) ---
+class Point
+class Domain
+```
+
 ---
 
 ## 6) 메인 시나리오 (요약)
